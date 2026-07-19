@@ -1,0 +1,26 @@
+POST https://localhost:4444/login
+
+Content-Type: application/json
+
+# {
+#     "employeeIdemployeeId":""
+# }
+{
+    "email":"ashok@quantumworks.in",
+    "password":"rAk@1998"
+}
+
+
+########################
+POST http://localhost:4444/api/add-employee
+
+Content-Type: application/json
+
+{
+  "employeeId": "QWIT-1001",
+  "firstName": "Quantum",
+  "lastName": "Works",
+  "fullName": "Quantum Works",
+  "email": "admin@qwitsolutions.com",
+  "password": "$2b$10$dwQzJzvQ83aFDfwIpQFQDulpkfLHGAHiyBmScvGMWND5YSk/Vp4Mi"
+}

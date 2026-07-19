@@ -1,0 +1,188 @@
+{{!-- <html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login Credentials</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+    * {
+      font-family: poppins !important;
+    }
+
+    body {
+      font-family: poppins;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f4f4f4;
+    }
+
+    h2 {
+      color: #333;
+    }
+
+    p {
+      color:
+        #555;
+    }
+
+    ul {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    li {
+      margin-bottom:
+        10px;
+    }
+
+    a {
+      color: #007BFF;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+
+<body>
+  <h2>Welcome to QuantumWorks IT Solutions</h2>
+  <p>Dear {{first_name}} {{last_name}},</p>
+  <p>Your account has been created successfully. Here are your login
+    credentials:</p>
+  <ul>
+    <li><strong>Email:</strong> {{office_email}}</li>
+    <li><strong>Password:</strong> {{generatedPassword}}</li>
+  </ul>
+  <p>Please click the following link to log in:</p>
+  <a href="{{loginLink}}">{{loginLink}}</a>
+  <p>Thank you for being part of {{company}}!</p>
+  <p>For your information, you may choose to change your password after the
+    login. You can update your password in the menu section.</p>
+  <div class="footer" style="text-align: center;">
+    <p style="color:#ff8135;display: flex;align-items: center; ">
+      <span style=" font-size: 1.5em; margin-left : 5px" class="">&copy;</span>
+
+      <span style=" font-size: 1em;" class=""> QuantumWorks IT Solutions</span>
+
+    </p>
+  </div>
+</body>
+
+</html> --}}
+
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login Credentials</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+    * {
+      font-family: 'Poppins', sans-serif !important;
+    }
+
+    body {
+      /* max-width: 600px; */
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f4f4f4;
+      color: #333;
+    }
+
+    h2 {
+      color: #333;
+    }
+
+    p {
+      color: #555;
+      line-height: 1.6;
+    }
+
+    ul {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    li {
+      margin-bottom: 10px;
+    }
+
+    a {
+      color: #0077c0;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .footer {
+      background-color: #44c4f2;
+      text-align: center;
+      margin-top: 20px;
+      padding: 10px;
+    }
+
+    .footer p {
+      color: #000;
+      font-size: 1em;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .footer span {
+      font-size: 13px;
+      margin-right: 5px;
+    }
+  </style>
+</head>
+
+<body>
+  <div>
+    <img src="https://res.cloudinary.com/dprcylred/image/upload/v1742070266/bdpbih5xiopoe7ho2g6g.png" alt="mail banner"
+      style="width:100%" />
+  </div>
+
+  <h2>Welcome to Quantum Works Private Limited</h2>
+  <p>Dear {{first_name}} {{last_name}},</p>
+
+  <p>We are pleased to inform you that your account has been successfully created. Below are your login details:</p>
+
+  <h4>Login Credentials:</h4>
+  <ul>
+    <li><strong>Email:</strong> {{office_email}}</li>
+    <li><strong>Password:</strong> {{generatedPassword}}</li>
+  </ul>
+
+  <p>To access your account, please click on the link below:</p>
+  <p><a href="{{loginLink}}">{{loginLink}}</a></p>
+
+  <p><strong>Important:</strong> For security reasons, we highly recommend changing your password upon your first
+    login.</p>
+
+  <p>If you encounter any issues or require assistance, feel free to contact our support team at <br /><a
+      href="mailto:hr@quantumworks.in">hr@quantumworks.in</a>.</p>
+
+  <p>We are excited to have you on board and look forward to working with you!</p>
+
+  <p>Best regards,</p>
+  <p><strong> Quantum Works Private Limited Team</strong></p>
+
+  <div class="footer">
+    <p>
+      <span>&copy;</span>
+      <span> Quantum Works Private Limited</span>
+    </p>
+  </div>
+</body>
+
+</html>

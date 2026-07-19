@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payslip for {{month}} - {{year}}</title>
+  <style>
+    * {
+      font-family: 'Arial', sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-size: 13px;
+      /* Smaller font size */
+    }
+
+    .header {
+      text-align: center;
+      border-bottom: 1px solid #000;
+      padding: 5px;
+    }
+
+    .header img {
+      width: 120px;
+      display: block;
+      margin: 0 auto;
+    }
+
+    .header h1 {
+      margin: 5px 0;
+      font-size: 14px;
+      /* Reduced font size */
+    }
+
+    .header p {
+      font-size: 8px;
+      /* Reduced font size */
+    }
+
+    .payslip-title {
+      background-color: #f2f2f2;
+      text-align: center;
+      padding: 4px;
+      font-weight: bold;
+      font-size: 10px;
+    }
+
+    .info-tables {
+      display: table;
+      width: 100%;
+      border-spacing: 8px;
+      margin-top: 10px;
+    }
+
+    .info-tables .table {
+      display: table-cell;
+      vertical-align: top;
+      width: 33%;
+    }
+
+    .info-tables table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .info-tables th,
+    .info-tables td {
+      text-align: left;
+      font-size: 8px;
+      border: none;
+      padding: 4px;
+    }
+
+    .info-tables th {
+      background-color: #fff;
+    }
+
+    .earnings-deductions {
+      margin-top: 15px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 8px;
+    }
+
+    th,
+    td {
+      text-align: left;
+      border: 1px solid #000;
+      padding: 4px;
+      font-size: 8px;
+      /* Reduced font size */
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+
+    .net-pay {
+      font-weight: bold;
+      text-align: left;
+      padding: 6px;
+      border: 1px solid #000;
+      font-size: 10px;
+      /* Adjusted size */
+    }
+
+    .footer {
+      text-align: center;
+      font-size: 8px;
+      margin-top: 10px;
+      page-break-before: auto;
+      /* Ensure no page break before footer */
+      page-break-after: avoid;
+      /* Prevent page break after footer */
+    }
+
+    .earnings-deductions table td {
+      border: none;
+    }
+
+    .earnings-deductions table tr th {
+      border: none;
+      border-top: 1px solid #000;
+      border-bottom: 1px solid #000;
+    }
+
+    .container {
+      padding: 15px !important;
+    }
+
+    /* Print-specific styles */
+    @media print {
+      body {
+        font-size: 8px;
+        /* Further reduce font size for printing */
+        margin: 0;
+        padding: 0;
+      }
+
+      .container {
+        padding: 5px;
+      }
+
+      .header img {
+        width: 100px;
+        /* Adjust logo size for printing */
+      }
+
+      /* Prevent breaking of the page */
+      .info-tables,
+      .earnings-deductions,
+      .net-pay {
+        page-break-inside: avoid;
+      }
+
+      /* Prevent page breaks inside certain elements */
+      .header,
+      .info-tables,
+      .earnings-deductions,
+      .net-pay,
+      .footer {
+        page-break-inside: avoid !important;
+      }
+
+      /* Ensure the page doesn't break in between tables */
+      table {
+        page-break-inside: avoid;
+      }
+
+      /* Adjust layout to fit content on a single page */
+      @page {
+        size: A4;
+        margin: 10mm 10mm;
+        /* Set margins to make the most use of space */
+      }
+
+      /* Force content to fit on one page */
+      .payslip-title {
+        font-size: 13px;
+        /* Adjust font size */
+        padding: 5px;
+      }
+
+      .net-pay {
+        font-size: 12px;
+        /* Slightly reduce net pay font size */
+      }
+
+      .footer {
+        font-size: 8px;
+        /* Adjust footer text size */
+      }
+
+      /* Prevent page break inside footer */
+      .footer {
+        page-break-before: auto !important;
+        page-break-after: avoid !important;
+      }
+    }
+  </style>
+
+</head>
+
+<body class="container">
+  <!-- Header Section -->
+  <div class="first-row mb-4 text-center"
+    style="text-align: center;margin-top:30px;display:flex;align-items: center;justify-content: center;">
+    <div>
+      <img src="https://res.cloudinary.com/dprcylred/image/upload/v1735751512/eb8j7h6y0my6wpq1x9ia.png"
+        alt="Company Logo" class="img-fluid" style="width: 90px;margin-bottom: 15px;">
+    </div>
+    <div>
+      <h1 style="font-size:25px;font-weight:  bold;">Quantum Works Private Limited</h1>
+      <p style="font-size: 14px;">Plot No. 97, 3rd floor, Ayyappa Society Main Rd, Near CGR
+        School, Madhapur, Telangana, 500081</p>
+      <p style="font-size: 14px;font-weight: bold;">Pay Slip for the Month of {{month}} - {{year}}</p>
+    </div>
+  </div>
+
+  <!-- Employee Info Tables -->
+  <div class="info-tables" style="margin-top:40px; border: 1px solid #555555;">
+    <div class="table">
+      <table>
+        <tr>
+          <th style="font-size: 15px;">Employee ID</th>
+          <td style="text-transform: uppercase;font-size: 15px;">{{employeeCode}}</td>
+        </tr>
+        <tr>
+          <th style="font-size: 15px;">Name</th>
+          <td style="text-transform: uppercase;font-size: 15px;">{{name}}</td>
+        </tr>
+        <tr>
+          <th style="font-size: 15px;">Date of Joining</th>
+          <td style="text-transform: uppercase;font-size: 15px;">{{dateOfJoining}}</td>
+        </tr>
+        {{!-- <tr>
+          <th style="font-size: 15px;">Location</th>
+          <td style="text-transform: uppercase;font-size: 15px;">{{location}}</td>
+        </tr> --}}
+        <tr>
+          <th style="font-size: 15px;">Department</th>
+          <td style="text-transform: uppercase;font-size: 15px;">{{department}}</td>
+        </tr>
+        <tr>
+          <th style="font-size: 15px;">Designation</th>
+          <td style="text-transform: uppercase;font-size: 15px;">{{designation}}</td>
+        </tr>
+        <tr>
+          <th style="font-size: 15px;">Paid Days</th>
+          <td style="font-size: 15px;">{{paidDays}}</td>
+        </tr>
+        <tr>
+          <th style="font-size: 15px;">LOP Days</th>
+          <td style="font-size: 15px;">{{lopDays}}</td>
+        </tr>
+      </table>
+    </div>
+    <div class="table">
+      <table>
+        <tr>
+          <th style="font-size: 15px;">Bank Name</th>
+          <td style="text-transform: uppercase;font-size: 15px;">{{bankName}}</td>
+        </tr>
+        <tr>
+          <th style="font-size: 15px;">Bank Account No</th>
+          <td style="text-transform: uppercase;font-size: 15px;">{{bankAccountNo}}</td>
+        </tr>
+        <tr>
+          <th style="font-size: 15px;">PF No.</th>
+          <td style="text-transform: uppercase;font-size: 15px;">{{pfNo}}</td>
+        </tr>
+        <tr>
+          <th style="font-size: 15px;">UAN</th>
+          <td style="text-transform: uppercase;font-size: 15px;">{{uan}}</td>
+        </tr>
+        <tr>
+          <th style="font-size: 15px;">PAN</th>
+          <td style="text-transform: uppercase;font-size: 15px;">{{pan}}</td>
+        </tr>
+        <tr>
+          <th style="font-size: 15px;">ESI No.</th>
+          <td style="text-transform: uppercase;font-size: 15px;">{{esiNo}}</td>
+        </tr>
+
+      </table>
+    </div>
+
+  </div>
+
+  <!-- Earnings Section -->
+  <div class="earnings-deductions">
+    <table>
+      <tr style="border-left: 1px solid #000 !important;border-right: 1px solid #000 !important;">
+        <th style="font-size: 15px;text-align:left padding-left:0;">Earning</th>
+        <th style="font-size: 15px;padding-left:0;text-align:left">Master</th>
+        <th style="font-size: 15px; padding-left:0;text-align:left">Paid</th>
+        <th style="font-size: 15px;text-align:center">Arrear</th>
+
+      </tr>
+      {{#each earnings}}
+      <tr style="border-left: 1px solid #000 !important;border-right: 1px solid #000 !important;">
+        <td style="font-size: 15px;text-align:left;padding-left:0px !important;">{{this.type}}</td>
+        <td style="font-size: 15px;text-align:left;">{{this.master}}</td>
+        <td style="font-size: 15px;text-align:left;padding-left:0">{{this.paid}}</td>
+        <td style="font-size: 15px;text-align:center;">{{this.arrear}}</td>
+
+      </tr>
+      {{/each}}
+      <tr style="border-left: 1px solid #000 !important;border-right: 1px solid #000 !important;">
+        <th style="font-size: 15px;text-align:left;">Total Earnings</th>
+        <th style="font-size: 15px;text-align:left;">{{totalEarnings.master}}</th>
+        <th style="font-size: 15px;text-align:left;padding-left:0">{{totalEarnings.paid}}</th>
+        <th style="font-size: 15px;text-align:center;">{{totalEarnings.arrear}}</th>
+
+      </tr>
+    </table>
+
+    <!-- Deductions Section -->
+    <table>
+      <tr style="border-left: 1px solid #000 !important;border-right: 1px solid #000 !important;">
+        <th style="font-size: 15px;text-align:left">Deduction</th>
+        <th style="font-size: 15px;text-align:left;padding-left:0">Master</th>
+        <th style="font-size: 15px;text-align:left;padding-left:0">Amount</th>
+        <th style="font-size: 15px;text-align:center">Arrear</th>
+
+      </tr>
+      {{#each deductions}}
+      <tr style="border-left: 1px solid #000 !important;border-right: 1px solid #000 !important;">
+        <td style="font-size: 15px;text-align:left;">{{this.type}}</td>
+        <td style="font-size: 15px;text-align:left;padding-left:0">{{this.deduction}}</td>
+        <td style="font-size: 15px;text-align:left;padding-left:0">{{this.deduction}}</td>
+        <td style="font-size: 15px;text-align:center;">{{this.arrear}}</td>
+
+      </tr>
+      {{/each}}
+      <tr style="border-left: 1px solid #000 !important;border-right: 1px solid #000 !important;">
+        <th style="font-size: 15px;">Total Deductions</th>
+        <th style="font-size: 15px;text-align:left;padding-left:0">{{totalDeductions.deduction}}</th>
+        <th style="font-size: 15px;text-align:left;padding-left:0">{{totalDeductions.deduction}}</th>
+        <th style="font-size: 15px;text-align: center;">{{totalDeductions.arrear}}</th>
+
+      </tr>
+    </table>
+  </div>
+
+  <!-- Net Pay -->
+  <div class="net-pay" style="font-size: 15px;padding:10px">
+    NET PAY (Total Earnings - Total Deduction - LOP Amount) : {{netPay}}
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <p style="font-size: 15px;">This is a computer generated document, hence no signature is required.</p>
+  </div>
+</body>
+
+</html>

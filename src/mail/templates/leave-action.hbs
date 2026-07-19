@@ -1,0 +1,141 @@
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{leave_title}}</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+    * {
+      font-family: 'Poppins', sans-serif !important;
+    }
+
+    body {
+      /* max-width: 600px; */
+      margin: 0;
+      /* padding: 20px; */
+      background-color: #f4f4f4;
+      color: #333;
+    }
+
+    .container {
+      /* max-width: 600px; */
+      padding: 20px auto;
+      background-color: #fff;
+      border: 1px solid #e3e3e3;
+      /* border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); */
+      overflow: hidden;
+    }
+
+    .banner {
+      width: 100%;
+    }
+
+    .header {
+      color: #333;
+      text-align: center;
+      padding: 10px;
+    }
+
+    .content {
+      padding: 20px;
+      line-height: 1.6;
+    }
+
+    .info {
+      /* padding: 10px; */
+      border-radius: 4px;
+      /* background-color: #f9f9f9; */
+    }
+
+    .info h2 {
+      font-size: 18px;
+      margin: 0 0 10px 0;
+    }
+
+    .info p {
+      font-size: 16px;
+      margin: 5px 0;
+    }
+
+    .footer {
+      text-align: center;
+      padding: 10px;
+      background-color: #44c4f2;
+    }
+
+    .footer p {
+      font-size: 14px;
+      color: #000;
+    }
+
+    /* Status Styles */
+    .action {
+      font-weight: bold;
+      padding: 5px 10px;
+      border-radius: 4px;
+    }
+
+    .action-approved {
+      background-color: #d1f7d9;
+      color: #228B22;
+    }
+
+    .action-declined {
+      background-color: #ffc6c6;
+      color: #B22222;
+    }
+
+    .action-pending {
+      background-color: #fff3cd;
+      color: #856404;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <!-- Banner Image -->
+    <img src="https://res.cloudinary.com/dprcylred/image/upload/v1742070266/bdpbih5xiopoe7ho2g6g.png"
+      alt="Company Banner" class="banner" style="width: 100%;" />
+
+    <div class="content">
+      <p>Dear <strong>{{user_name}},</strong></p>
+      <p>We have reviewed your leave request, and below are the details of the action taken:</p>
+
+      <div class="info">
+        <h2>Leave Request Details</h2>
+        <p><strong>Leave Type:</strong> {{leave_type}}</p>
+        <p><strong>Duration:</strong> {{from_date}} to {{to_date}} ({{no_of_days}} days)</p>
+        {{#if decline_reason}}
+        <p><strong>Reason for Decline:</strong> {{decline_reason}}</p>
+        {{/if}}
+        <p><strong>Status:</strong> <span class="action {{action_class}}">{{action_text}}</span></p>
+        <p><strong>Processed On:</strong> {{current_date}}</p>
+      </div>
+
+      <p>
+        If you have any questions or need further clarification regarding your leave request,
+        please feel free to reach out to your HR department or manager.
+      </p>
+
+      <p>
+        Thank you for your cooperation. We appreciate your commitment to maintaining
+        a smooth workflow while managing your time off effectively.
+      </p>
+
+      <p>Best regards,</p>
+      <p><strong>HR Team</strong><br>Quantum Works Private Limited</p>
+    </div>
+
+    <div class="footer">
+      <p>&copy; Quantum Works Private Limited. All rights reserved.</p>
+      <p>For any HR-related queries, contact<br/> <a
+          href="mailto:hr@quantumworks.in">hr@quantumworks.in</a></p>
+    </div>
+  </div>
+</body>
+
+</html>
