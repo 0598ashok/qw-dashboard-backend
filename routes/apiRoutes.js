@@ -245,22 +245,23 @@ router.get("/date-wise-data/:employeeId", middleware, async (req, res) => {
     }
 
     // Filter based on employeeName
-    let employeeFilterStage = {};
+    let employeeFilterStage = null;
     if (employeeName) {
       const employee = await Employees.findOne({ name: employeeName });
       if (employee) {
-        employeeFilterStage = { $match: { employeeId: employee._id } };
+        employeeFilterStage = { employeeId: employee._id };
       }
+    }
+
+    const matchConditions = [{ employeeId: employeeId }, ...filterByMonthYear];
+    if (employeeFilterStage) {
+      matchConditions.push(employeeFilterStage);
     }
 
     const dateWiseData = await Attendance.aggregate([
       {
         $match: {
-          $and: [
-            { employeeId: employeeId },
-            ...filterByMonthYear,
-            employeeFilterStage,
-          ],
+          $and: matchConditions,
         },
       },
       {
@@ -461,7 +462,8 @@ router.post("/apply-leave", middleware, async (req, res) => {
 
     const savedLeave = await newLeave.save();
     res.json({ message: "Leave Applied Successfully" });
-    return new Promise(async (resolve, reject) => {
+
+    try {
       const formatDate = (dateString) => {
         const options = { year: "numeric", month: "long", day: "numeric" };
         return new Date(dateString).toLocaleDateString(undefined, options);
@@ -471,9 +473,10 @@ router.post("/apply-leave", middleware, async (req, res) => {
         employeeId: newLeave.employeeId,
       });
 
-      let user_name =
-        reportingUserResult?.firstName + " " + reportingUserResult?.lastName;
-      sendEmail({
+      let user_name = reportingUserResult
+        ? `${reportingUserResult.firstName || ""} ${reportingUserResult.lastName || ""}`.trim()
+        : employeeId;
+      await sendEmail({
         to: "hr@quantumworks.in",
         subject: `Leave applied by ${user_name} - ${employeeId}`,
         templateName: "templates/leave-request.hbs",
@@ -481,7 +484,6 @@ router.post("/apply-leave", middleware, async (req, res) => {
           leave_title: `Leave applied by ${user_name} - ${employeeId}`,
           admin: "Admin ",
           employee_name: user_name,
-          // request_date: formatDate(updatedLeave?.applied_date),
           employee_id: employeeId,
           employee_department: reportingUserResult?.department,
           employee_designation: reportingUserResult?.designation,
@@ -494,7 +496,9 @@ router.post("/apply-leave", middleware, async (req, res) => {
           company: "Quantum Works Private Limited",
         },
       });
-    });
+    } catch (emailErr) {
+      console.error("Error sending leave request email:", emailErr);
+    }
   } catch (error) {
     console.error("apply leave api", error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -513,10 +517,14 @@ router.put("/leave/update-status", middleware, async (req, res) => {
       { status },
       { new: true }
     );
+    if (!updatedLeave) {
+      return res.status(404).json({ error: "Leave request not found" });
+    }
     console.log(updatedLeave);
     // Send the updated leave as the response
     res.json({ message: `Leave ${updatedLeave.status}` });
-    return new Promise(async (resolve, reject) => {
+
+    try {
       const formatDate = (dateString) => {
         const options = { year: "numeric", month: "long", day: "numeric" };
         return new Date(dateString).toLocaleDateString(undefined, options);
@@ -529,14 +537,13 @@ router.put("/leave/update-status", middleware, async (req, res) => {
       console.log(updatedLeave, "updated record");
       let user_name =
         reportingUserResult?.firstName + " " + reportingUserResult?.lastName;
-      sendEmail({
+      await sendEmail({
         to: reportingUserResult?.email,
         subject: `Leave ${status}`,
         templateName: "templates/leave-action.hbs",
         context: {
           leave_title: "Leave Request Updated",
           user_name: user_name,
-          // request_date: formatDate(updatedLeave?.applied_date),
           leave_type: updatedLeave?.type,
           from_date: formatDate(updatedLeave?.from),
           to_date: formatDate(updatedLeave?.to),
@@ -547,7 +554,9 @@ router.put("/leave/update-status", middleware, async (req, res) => {
           company: "Quantum Works Private Limited",
         },
       });
-    });
+    } catch (emailErr) {
+      console.error("Error sending leave status email:", emailErr);
+    }
   } catch (error) {
     console.error("Error updating leave status:", error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -791,7 +800,7 @@ router.delete("/delete-holiday/:id", middleware, async (req, res) => {
 });
 
 //add employee api
-router.post("/add-employee", async (req, res) => {
+router.post("/add-employee", middleware, async (req, res) => {
   try {
     // Check if employeeId or email already exists
     const existingEmployee = await Employees.findOne({
@@ -807,6 +816,10 @@ router.post("/add-employee", async (req, res) => {
     // Combine firstName and lastName to create fullName
     req.body.fullName = `${req.body.firstName} ${req.body.lastName}`;
 
+    if (!req.body.password) {
+      return res.status(400).json({ message: "Password is required" });
+    }
+
     // Hash the password
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
     let password = req.body.password;
@@ -819,14 +832,10 @@ router.post("/add-employee", async (req, res) => {
     // Save the employee to the database
     const savedEmployee = await newEmployee.save();
 
-    res.status(201).json({ message: "Employee added successfully" });
-    return new Promise((resolve, reject) => {
-      // if (error) {
-      //     reject(error);
-      // } else {
-
+    let emailSent = false;
+    try {
       // Send email with the generated password
-      sendEmail({
+      const emailResult = await sendEmail({
         to: req.body.email,
         subject: "Login credentials",
         templateName: "templates/user-created.hbs",
@@ -836,10 +845,19 @@ router.post("/add-employee", async (req, res) => {
           office_email: req.body.email,
           generatedPassword: password,
           loginLink: `https://quantumworks.space`,
-          // generatedPassword,
           company: "Quantum Works Private Limited",
         },
       });
+      if (emailResult && emailResult.success) {
+        emailSent = true;
+      }
+    } catch (emailErr) {
+      console.error("Error sending user creation email:", emailErr);
+    }
+
+    res.status(201).json({
+      message: "Employee added successfully",
+      emailSent: emailSent
     });
   } catch (error) {
     console.error("Error adding employee:", error);
@@ -930,14 +948,13 @@ router.delete("/delete-employee/:employeeId", middleware, async (req, res) => {
   try {
     const { employeeId } = req.params;
     const employee = await Employees.findOneAndDelete({ employeeId });
-    const employeeLeave = await Leave.findOneAndDelete({ employeeId });
-    const employeeAttendance = await Attendance.findOneAndDelete({
-      employeeId,
-    });
-
     if (!employee) {
       return res.status(404).json({ error: "Employee not found" });
     }
+    await Leave.deleteMany({ employeeId });
+    await Attendance.deleteMany({ employeeId });
+    await Payslips.deleteMany({ employeeId });
+
     res.json({ message: "Employee deleted successfully" });
   } catch (error) {
     console.error("Error deleting employee:", error);
@@ -1004,7 +1021,7 @@ router.put("/changepassword/:employeeId", middleware, async (req, res) => {
 //       res.status(500).json({ error: 'Internal server error' });
 //   }
 // })
-router.post("/upload-payslip/", async (req, res) => {
+router.post("/upload-payslip/", middleware, async (req, res) => {
   try {
     const { employeeId, month, year, url } = req.body;
 
@@ -1030,7 +1047,7 @@ router.post("/upload-payslip/", async (req, res) => {
   }
 });
 
-router.delete("/delete-employeepayslip/:payslipId", async (req, res) => {
+router.delete("/delete-employeepayslip/:payslipId", middleware, async (req, res) => {
   try {
     const { payslipId } = req.params;
     const existingPayslip = await Payslips.findOne({ _id: payslipId });
@@ -1042,66 +1059,6 @@ router.delete("/delete-employeepayslip/:payslipId", async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal server error" });
-  }
-});
-
-//add employee api
-router.post("/add-employee", middleware, async (req, res) => {
-  try {
-    // Check if employeeId or email already exists
-    const existingEmployee = await Employees.findOne({
-      $or: [{ employeeId: req.body.employeeId }, { email: req.body.email }],
-    });
-
-    if (existingEmployee) {
-      return res
-        .status(400)
-        .json({ message: "EmployeeId or Email already exists" });
-    }
-
-    // Combine firstName and lastName to create fullName
-    req.body.fullName = `${req.body.firstName} ${req.body.lastName}`;
-
-    // Hash the password
-    const hashedPassword = await bcrypt.hash(req.body.password, 10);
-    let password = req.body.password;
-    // Replace the original password with the hashed one
-    req.body.password = hashedPassword;
-
-    // Create a new employee
-    const newEmployee = new Employees(req.body);
-
-    // Save the employee to the database
-    const savedEmployee = await newEmployee.save();
-
-    res.status(201).json({ message: "Employee added successfully" });
-    return new Promise((resolve, reject) => {
-      // if (error) {
-      //     reject(error);
-      // } else {
-      // Send email with the generated password
-      sendEmail({
-        to: req.body.email,
-        subject: "Login credentials",
-        templateName: "templates/user-created.hbs",
-        context: {
-          first_name: req.body.firstName,
-          last_name: req.body.lastName,
-          office_email: req.body.email,
-          generatedPassword: password,
-          loginLink: `https://quantumworks.space`,
-          // generatedPassword,
-          company: "Quantum Works Private Limited",
-        },
-      });
-
-      // resolve({ ...newUser, id: results.insertId, password: undefined });
-
-      // }
-    });
-  } catch (error) {
-    console.error("Error adding employee:", error);
-    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
@@ -1175,30 +1132,6 @@ router.put("/update-employee/:id", middleware, async (req, res) => {
   }
 });
 
-//get all leaves for employee
-router.get("/get-leaves/:employeeId", middleware, async (req, res) => {
-  try {
-    const { employeeId } = req.params;
-    const leaves = await Leave.find({ employeeId });
-    const formattedLeaves = leaves.map((leave) => ({
-      _id: leave._id,
-      type: leave.type,
-      from: format(new Date(leave.from), "dd-MM-yyyy"),
-      to: format(new Date(leave.to), "dd-MM-yyyy"),
-      days: leave.days,
-      reason: leave.reason,
-      status: leave.status,
-      actionBy: leave.actionBy,
-      action: leave.action,
-    }));
-
-    res.json(formattedLeaves);
-  } catch (error) {
-    console.error("indv leaves api", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
-
 // get individual employee  payslips for months
 
 router.get("/employee-payslip/:employeeId", middleware, async (req, res) => {
@@ -1214,7 +1147,7 @@ router.get("/employee-payslip/:employeeId", middleware, async (req, res) => {
 });
 
 //add department
-router.post("/department", async (req, res) => {
+router.post("/department", middleware, async (req, res) => {
   try {
     const { department, designation } = req.body;
 
@@ -1240,7 +1173,7 @@ router.post("/department", async (req, res) => {
 
 // getting departments
 
-router.get("/getDepartment", async (req, res) => {
+router.get("/getDepartment", middleware, async (req, res) => {
   try {
     const departments = await Department.find();
     res.status(200).json(departments);
@@ -1252,7 +1185,7 @@ router.get("/getDepartment", async (req, res) => {
 
 // Leave Type
 
-router.post("/leaveType", async (req, res) => {
+router.post("/leaveType", middleware, async (req, res) => {
   try {
     const { leaveType } = req.body;
 
@@ -1275,7 +1208,7 @@ router.post("/leaveType", async (req, res) => {
 
 // get leavetype
 
-router.get("/getLeavetype", async (req, res) => {
+router.get("/getLeavetype", middleware, async (req, res) => {
   try {
     const leavetypes = await LeaveType.find();
     res.status(200).json(leavetypes);
@@ -1286,7 +1219,7 @@ router.get("/getLeavetype", async (req, res) => {
 });
 
 // Generate payslip
-router.post("/generate-payslip", async (req, res) => {
+router.post("/generate-payslip", middleware, async (req, res) => {
   try {
     const {
       empId,
@@ -1343,6 +1276,9 @@ router.post("/generate-payslip", async (req, res) => {
     }
 
     const employee = await Employees.findOne({ employeeId: empId });
+    if (!employee) {
+      return res.status(404).json({ message: `Employee with ID ${empId} not found` });
+    }
 
     // Data to pass to the HBS template
     const payslipData = {
@@ -1493,7 +1429,7 @@ router.post("/generate-payslip", async (req, res) => {
 });
 
 // Get all payslips for an employee and filter by month and year if provided
-router.get("/payslips", async (req, res) => {
+router.get("/payslips", middleware, async (req, res) => {
   try {
     const { empId, month, year } = req.query;
     // console.log(empId, month, year)
@@ -1518,7 +1454,7 @@ router.get("/payslips", async (req, res) => {
 });
 
 // Delete payslip by empId, month, and year
-router.delete("/delete-payslip/:payslipId", async (req, res) => {
+router.delete("/delete-payslip/:payslipId", middleware, async (req, res) => {
   try {
     const { payslipId } = req.params;
 

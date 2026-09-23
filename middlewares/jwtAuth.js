@@ -16,11 +16,12 @@ module.exports = function(req, res, next) {
             return res.status(400).json("JWT token not found");
         }
 
-        let compareToken = jwt.verify(token, "jwtPassword");
+        const secret = process.env.JWT_SECRET || "jwtPassword";
+        let compareToken = jwt.verify(token, secret);
         req.employeeId = compareToken.employeeId; // comparing requested user and logged in user
         next();
     } catch (e) {
         console.log(e, "JWT auth failed");
-        return res.status(500).json("Internal server error");
+        return res.status(401).json("Unauthorized: Invalid or expired token");
     }
 };
