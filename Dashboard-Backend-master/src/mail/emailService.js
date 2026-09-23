@@ -1,76 +1,46 @@
-// emailService.js
-const nodemailer = require('nodemailer');
+// emailService.js - Migrated to Resend API
+const { Resend } = require('resend');
 const handlebars = require('handlebars');
 const fs = require('fs');
 const path = require('path');
-const config = require('./config.js');
 const currentDir = __dirname;
 
-require('dotenv').config()
+require('dotenv').config();
 
-// const transporter = nodemailer.createTransport({
-//     service: config.email.service,
-//     auth: {
-//         user: config.email.user,
-//         pass: config.email.pass,
-//     },
-// });
+// Initialize Resend SDK using environment variable
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-
-// const transporter = nodemailer.createTransport({
-//     host: "smtp.hostinger.com",
-//     port: 465,
-//     secure: true, // true for 465, false for other ports
-//     auth: {
-//         user: "hr@ecoquesttechnologies.com", // generated ethereal user
-//         pass: "Ecoquest@123", // generated ethereal password
-//     },
-//     tls: {
-//         rejectUnauthorized: false,
-//    },
-// });
-
-
-
-
-
-const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: 465,
-    secure: true, // true for 465, false for other ports
-    auth: {
-        user: process.env.SMTP_USERNAME,
-        pass: process.env.SMTP_PASSWORD, 
-    },
-    tls: {
-        rejectUnauthorized: false,
-
-      },
-
-      },
-
-);
-
-function sendEmail({ to, subject, templateName, context }) {
-    const templatePath = path.join(currentDir, templateName);
-    const source = fs.readFileSync(templatePath, 'utf8');
-    const template = handlebars.compile(source);
-
-    const emailData = {
-        // from: config.email.from,
-        from : process.env.SMTP_USERNAME,
-        to: to,
-        subject: subject,
-        html: template(context),
-    };
-
-    transporter.sendMail(emailData, (error, info) => {
-        if (error) {
-            console.log('Error sending email: ', error);
-        } else {
-            console.log('Email sent: ', info.response);
+async function sendEmail({ to, subject, templateName, context }) {
+    try {
+        const templatePath = path.join(currentDir, templateName);
+        if (!fs.existsSync(templatePath)) {
+            console.error(`Email template not found: ${templatePath}`);
+            return { success: false, error: `Template file not found at ${templatePath}` };
         }
-    });
+        const source = fs.readFileSync(templatePath, 'utf8');
+        const template = handlebars.compile(source);
+        const htmlContent = template(context);
+
+        const fromAddress = process.env.MAIL_FROM || process.env.SMTP_FROM || 'hr@quantumworks.in';
+
+        const { data, error } = await resend.emails.send({
+            from: fromAddress,
+            to: Array.isArray(to) ? to : [to],
+            subject: subject,
+            html: htmlContent,
+        });
+
+        if (error) {
+            console.error('Error sending email (Resend API):', error);
+            return { success: false, error: error.message || error };
+        }
+
+        console.log('Email sent successfully via Resend API:', data);
+        return { success: true, info: data };
+    } catch (error) {
+        console.error('Exception sending email (Resend API):', error.message || error);
+        return { success: false, error: error.message || error };
+    }
 }
 
 module.exports = { sendEmail };
