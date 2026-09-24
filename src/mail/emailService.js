@@ -10,6 +10,9 @@ require('dotenv').config();
 // Initialize Resend SDK using environment variable
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+console.log('RESEND API KEY EXISTS:', !!process.env.RESEND_API_KEY);
+console.log('MAIL_FROM:', process.env.MAIL_FROM || 'hr@quantumworks.in');
+
 async function sendEmail({ to, subject, templateName, context }) {
     try {
         const templatePath = path.join(currentDir, templateName);
